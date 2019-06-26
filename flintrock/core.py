@@ -530,14 +530,14 @@ def ensure_java8(client: paramiko.client.SSHClient):
                 set -e
 
                 # Install Java 1.8 first to protect packages that depend on Java from being removed.
-                sudo yum install -y java-1.8.0-openjdk
+                sudo apt update && sudo apt install -y openjdk-8-jdk
 
                 # Remove any older versions of Java to force the default Java to 1.8.
                 # We don't use /etc/alternatives because it does not seem to update links in /usr/lib/jvm correctly,
                 # and we don't just rely on JAVA_HOME because some programs use java directly in the PATH.
-                sudo yum remove -y java-1.6.0-openjdk java-1.7.0-openjdk
+                # sudo yum remove -y java-1.6.0-openjdk java-1.7.0-openjdk
 
-                sudo sh -c "echo export JAVA_HOME=/usr/lib/jvm/jre >> /etc/environment"
+                sudo sh -c "echo export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 >> /etc/environment"
                 source /etc/environment
             """)
 
@@ -582,7 +582,7 @@ def setup_node(
         client=ssh_client,
         command="""
             set -e
-            python /tmp/setup-ephemeral-storage.py
+            python3 /tmp/setup-ephemeral-storage.py
             rm -f /tmp/setup-ephemeral-storage.py
         """)
     storage_dirs = json.loads(storage_dirs_raw)
