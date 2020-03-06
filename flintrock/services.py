@@ -112,6 +112,11 @@ class HDFS(FlintrockService):
         self.version = version
         self.download_source = download_source
         self.manifest = {'version': version, 'download_source': download_source}
+        major_version = int(self.version.split(".")[0])
+        if major_version < 3:
+            self.namenode_port = 50070
+        else:
+            self.namenode_port = 9870
 
     def install(
             self,
@@ -210,10 +215,10 @@ class HDFS(FlintrockService):
                             sleep 1
                             master_ui_response_code="$(
                                 curl --head --silent --output /dev/null \
-                                    --write-out "%{{http_code}}" {m}:50070
+                                    --write-out "%{{http_code}}" {m}:{port}
                             )"
                         done
-                    """.format(m=shlex.quote(cluster.master_host)),
+                    """.format(m=shlex.quote(cluster.master_host), port=self.namenode_port),
                     timeout_seconds=90
                 )
                 break
@@ -228,7 +233,8 @@ class HDFS(FlintrockService):
     def health_check(self, master_host: str):
         # This info is not helpful as a detailed health check, but it gives us
         # an up / not up signal.
-        hdfs_master_ui = 'http://{m}:50070/webhdfs/v1/?op=GETCONTENTSUMMARY'.format(m=master_host)
+        hdfs_master_ui = 'http://{m}:{port}/webhdfs/v1/?op=GETCONTENTSUMMARY'.format(
+            m=master_host, port=self.namenode_port)
 
         try:
             json.loads(
