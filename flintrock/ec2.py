@@ -561,6 +561,12 @@ def get_or_create_flintrock_security_groups(
             to_port=50070,
             cidr_ip=flintrock_client_cidr,
             src_group=None),
+        SecurityGroupRule(
+            ip_protocol='tcp',
+            from_port=9870,
+            to_port=9870,
+            cidr_ip=flintrock_client_cidr,
+            src_group=None),
         # Spark
         SecurityGroupRule(
             ip_protocol='tcp',
